@@ -1,0 +1,125 @@
+﻿@model IEnumerable<MVC_Project.Models.Candidate>
+@{
+    ViewBag.Title = "Index";
+
+}
+@using X.PagedList
+@using X.PagedList.Mvc
+@using X.PagedList.Mvc.Common
+
+<div class="row">
+    <div class="col-12">
+        <h3>Candidates</h3>
+        <div class="d-flex justify-content-end mb-1">
+            @Html.ActionLink("Create", "Create", "Candidates", new { }, new { @class = "btn btn-primary btn-sm" })
+        </div>
+        <table class="table table-bordered">
+            <thead class="table-light">
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>Candidate Name</th>
+                    <th>Date of birth</th>
+                    <th>Applied For</th>
+                    <th>Expected Salary</th>
+                    <th>Agree to Work from home?</th>
+                    <th>...</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr id="tr_@c.CandidateId" style="vertical-align:middle">
+                        <td class="text-center">
+                            <button type="button" id="show_@c.CandidateId" class="btn btn-link btn-sm show" data-aid="@c.CandidateId"><i class="bi bi-plus-square"></i></button>
+                            <button type="button" id="hide_@c.CandidateId" class="btn btn-link btn-sm hide" data-aid="@c.CandidateId" style="display:none"><i class="bi bi-dash-square"></i></button>
+                        </td>
+                        <td>
+                            <img class="img-thumbnail" src="~/Pictures/@c.Picture" style="width:50px" />
+                        </td>
+                        <td>@c.CandidateName</td>
+                        <td>@c.BirthDate.ToString("yyyy-MM-dd")</td>
+                        <td>@c.AppliedFor</td>
+                        <td>@c.ExpectedSalary.ToString("0.00")</td>
+                        <td>@(c.WorkFromHome ? "Yes": "No")</td>
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", "Candidates", new { id = c.CandidateId }, new { @class = "btn btn-primary btn-sm" })
+                            @Ajax.ActionLink("Delete", "Delete", new { id = c.CandidateId },
+                           new AjaxOptions { Confirm = "Are youre to delele?\nRelated data will also be deleted", HttpMethod = "Post", OnSuccess = "onSuccess" },
+                           new { @class = "btn btn-danger btn-sm" })
+                        </td>
+                    </tr>
+                    <tr style="display:none" id="q_@c.CandidateId">
+                        <td></td>
+                        <td colspan="10">
+                            <h4>Qualifications</h4>
+                            <table class="table table-striped">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Degree</th>
+                                        <th>PassingYear</th>
+                                        <th>Institute</th>
+                                        <th>Result</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var o in c.Qualifications)
+                                    {
+                                        <tr>
+                                            <td>@o.Degree</td>
+                                            <td>@o.PassingYear</td>
+                                            <td>@o.Institute</td>
+                                            <td>@o.Result</td>
+
+                                        </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-end">
+            @Html.PagedListPager((IPagedList)Model, pg => Url.Action("Index", new { pg = pg }), new PagedListRenderOptions
+            {
+                LiElementClasses = new string[] { "page-item" },
+                PageClasses = new string[] { "page-link" }
+            })
+        </div>
+    </div>
+</div>
+@section styles
+{
+    <link href="~/Content/icons/font/bootstrap-icons.css" rel="stylesheet" />
+}
+@section scripts {
+    <script src="~/Scripts/jquery-3.6.3.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script>
+        function onSuccess(r) {
+            console.log(r);
+            $("#tr_" + r).remove();
+        }
+    </script>
+    <script src="~/Scripts/jquery-3.7.0.js"></script>
+    <script>
+        $(() => {
+            $(".show").click(function () {
+                var aid = $(this).data("aid");
+                //console.log(aid);
+                $(`#q_${aid}`).show();
+                $(`#hide_${aid}`).show();
+                $(this).hide();
+            });
+            $(".hide").click(function () {
+                var aid = $(this).data("aid");
+                //console.log(aid);
+                $(`#q_${aid}`).hide();
+                $(`#show_${aid}`).show();
+                $(this).hide();
+            })
+        });
+    </script>
+}
